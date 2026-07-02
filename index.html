@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoastalTrace - Seafood Traceability Platform | Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        ocean: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e' },
+                        coral: { 50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c', 800: '#9f1239', 900: '#881337' },
+                        sand: { 50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4', 300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c', 600: '#57534e', 700: '#44403c', 800: '#292524', 900: '#1c1917' },
+                        sea: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' },
+                        amber: { 50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-ocean { background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 50%, #0ea5e9 100%); }
+        .gradient-coral { background: linear-gradient(135deg, #be123c 0%, #e11d48 50%, #f43f5e 100%); }
+        .gradient-sea { background: linear-gradient(135deg, #064e3b 0%, #059669 50%, #10b981 100%); }
+        .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .pulse-ring { animation: pulse-ring 2s infinite; }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .scroll-reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+        .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+        .sticky-nav { position: sticky; top: 0; z-index: 50; }
+        .section-divider { height: 80px; background: linear-gradient(to right, transparent, #0ea5e9, transparent); opacity: 0.3; }
+        .badge-built { background: #10b981; color: white; }
+        .badge-simulated { background: #f59e0b; color: white; }
+        .badge-roadmap { background: #6b7280; color: white; }
+        .risk-low { background: #10b981; }
+        .risk-medium { background: #f59e0b; }
+        .risk-high { background: #ef4444; }
+        .tab-btn { cursor: pointer; padding: 0.75rem 1.5rem; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .tab-btn.active { border-bottom-color: #0ea5e9; color: #0ea5e9; font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="font-sans bg-sand-50 text-sand-800">
+
+    <!-- Navigation -->
+    <nav class="sticky-nav gradient-ocean text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-fish text-ocean-700 text-xl"></i>
+                    </div>
+                    <span class="font-serif text-2xl font-bold tracking-tight">CoastalTrace</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#hero" class="hover:text-ocean-200 transition">Home</a>
+                    <a href="#problem" class="hover:text-ocean-200 transition">Problem</a>
+                    <a href="#solution" class="hover:text-ocean-200 transition">Solution</a>
+                    <a href="#workflow" class="hover:text-ocean-200 transition">Workflow</a>
+                    <a href="#architecture" class="hover:text-ocean-200 transition">Architecture</a>
+                    <a href="#financials" class="hover:text-ocean-200 transition">Financials</a>
+                    <a href="#demo" class="hover:text-ocean-200 transition">Live Demo</a>
+                    <a href="#analysis" class="hover:text-ocean-200 transition">Analysis</a>
+                </div>
+                <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-ocean-800 pb-4 px-4">
+            <a href="#hero" class="block py-2 hover:text-ocean-200">Home</a>
+            <a href="#problem" class="block py-2 hover:text-ocean-200">Problem</a>
+            <a href="#solution" class="block py-2 hover:text-ocean-200">Solution</a>
+            <a href="#workflow" class="block py-2 hover:text-ocean-200">Workflow</a>
+            <a href="#architecture" class="block py-2 hover:text-ocean-200">Architecture</a>
+            <a href="#financials" class="block py-2 hover:text-ocean-200">Financials</a>
+            <a href="#demo" class="block py-2 hover:text-ocean-200">Live Demo</a>
+            <a href="#analysis" class="block py-2 hover:text-ocean-200">Analysis</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative min-h-screen gradient-ocean flex items-center overflow-hidden">
+        <div class="absolute inset-0 opacity-20">
+            <svg class="w-full h-full" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.5"/></pattern></defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+        <div class="absolute top-20 right-20 w-64 h-64 bg-coral-500 rounded-full opacity-10 blur-3xl"></div>
+        <div class="absolute bottom-20 left-20 w-96 h-96 bg-sea-400 rounded-full opacity-10 blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-white">
+                    <div class="inline-flex items-center space-x-2 bg-white/10 rounded-full px-4 py-2 mb-6 glass">
+                        <span class="w-2 h-2 bg-sea-400 rounded-full animate-pulse"></span>
+                        <span class="text-sm font-medium">Hackathon 2026 Finalist</span>
+                    </div>
+                    <h1 class="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6">
+                        From <span class="text-sea-300">Boat Deck</span> to<br>Export Dock
+                    </h1>
+                    <p class="text-xl text-ocean-100 mb-8 leading-relaxed max-w-xl">
+                        Voice-first seafood traceability for Indian coastal exporters. Zero hardware. 22 languages. Real-time spoilage prediction.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="scrollToSection('demo')" class="bg-white text-ocean-800 px-8 py-4 rounded-xl font-bold hover:bg-ocean-50 transition shadow-lg flex items-center space-x-2">
+                            <i class="fas fa-play-circle"></i>
+                            <span>See Live Demo</span>
+                        </button>
+                        <button onclick="scrollToSection('solution')" class="glass text-white px-8 py-4 rounded-xl font-bold hover:bg-white/20 transition flex items-center space-x-2">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>How It Works</span>
+                        </button>
+                    </div>
+                    <div class="mt-12 flex items-center space-x-8 text-sm text-ocean-200">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-sea-400"></i>
+                            <span>MPEDA Compliant</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-sea-400"></i>
+                            <span>EU-IUU Ready</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-check-circle text-sea-400"></i>
+                            <span>Zero Hardware</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="glass rounded-2xl p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
+                        <div class="bg-white rounded-xl p-4 shadow-inner">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 bg-ocean-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-fish text-ocean-600 text-sm"></i>
+                                    </div>
+                                    <span class="font-semibold text-sand-700">CoastalTrace Dashboard</span>
+                                </div>
+                                <span class="text-xs bg-sea-100 text-sea-700 px-2 py-1 rounded-full">Live</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between bg-sand-50 rounded-lg p-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-ship text-ocean-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-sand-800">Ganesh (Fisherman)</p>
+                                            <p class="text-xs text-sand-500">Arriving in 45 min - 120kg Seer Fish</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">En Route</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-sand-50 rounded-lg p-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-sea-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-warehouse text-sea-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-sand-800">Raju (Agent)</p>
+                                            <p class="text-xs text-sand-500">At Harbour - Auction in 30 min</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs bg-sea-100 text-sea-700 px-2 py-1 rounded-full">Active</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-sand-50 rounded-lg p-3 opacity-60">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-sand-200 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-truck text-sand-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-sand-600">Joseph (Truck)</p>
+                                            <p class="text-xs text-sand-400">Simulated - Temp: 2C</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs bg-sand-200 text-sand-500 px-2 py-1 rounded-full">Simulated</span>
+                                </div>
+                                <div class="mt-4 p-3 bg-coral-50 rounded-lg border border-coral-200">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-coral-700"><i class="fas fa-exclamation-triangle mr-2"></i>Risk Alert</span>
+                                        <span class="text-xs bg-coral-200 text-coral-800 px-2 py-1 rounded-full">Medium</span>
+                                    </div>
+                                    <p class="text-xs text-coral-600 mt-1">Route delay + temp rise. Spoilage risk: 12% to 28%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-4 -right-4 glass rounded-xl p-4 shadow-xl">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-sea-500 rounded-full flex items-center justify-center pulse-ring">
+                                <i class="fas fa-microphone text-white text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-white font-semibold">Voice Note Received</p>
+                                <p class="text-xs text-ocean-200">Tamil to English (Bhashini)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-sand-50 to-transparent"></div>
+    </section>
+
+    <!-- Problem Statement -->
+    <section id="problem" class="py-20 bg-sand-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-coral-600 font-semibold text-sm uppercase tracking-wider">The Challenge</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">India Seafood Export Crisis</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">$6.2B industry losing 15-25% to spoilage. Zero digital traceability from boat to dock.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white rounded-2xl p-8 shadow-lg card-hover scroll-reveal">
+                    <div class="w-14 h-14 bg-coral-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-temperature-high text-coral-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-sand-800 mb-3">Spoilage Losses</h3>
+                    <p class="text-sand-500 mb-4">Cold chain breaks go undetected for hours. By the time quality control catches it, the batch is already compromised.</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-3xl font-bold text-coral-600">Rs.1,200Cr</span>
+                        <span class="text-sm text-sand-400">annual loss</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-lg card-hover scroll-reveal">
+                    <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-file-contract text-amber-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-sand-800 mb-3">Compliance Gap</h3>
+                    <p class="text-sand-500 mb-4">MPEDA and EU-IUU regulations require full traceability. Current systems are paper-based, error-prone, and audit-failing.</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-3xl font-bold text-amber-600">0%</span>
+                        <span class="text-sm text-sand-400">digital traceability</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-lg card-hover scroll-reveal">
+                    <div class="w-14 h-14 bg-ocean-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-language text-ocean-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-sand-800 mb-3">Language Barrier</h3>
+                    <p class="text-sand-500 mb-4">Dock agents and fishermen speak Tamil, Telugu, Malayalam. Existing ERPs are English-only, creating adoption friction.</p>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-3xl font-bold text-ocean-600">22</span>
+                        <span class="text-sm text-sand-400">languages needed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pain Points Flow -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg scroll-reveal">
+                <h3 class="text-2xl font-bold text-sand-800 mb-8 text-center">Current Broken Workflow</h3>
+                <div class="flex flex-wrap justify-center items-center gap-4">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-coral-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-phone text-coral-600 text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-sand-700">Phone Call</p>
+                        <p class="text-xs text-sand-400">Fisherman to Agent</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-sand-300 text-2xl"></i>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-book text-amber-600 text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-sand-700">Paper Ledger</p>
+                        <p class="text-xs text-sand-400">Manual entry</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-sand-300 text-2xl"></i>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-clipboard-list text-amber-600 text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-sand-700">Excel Sheet</p>
+                        <p class="text-xs text-sand-400">End-of-day</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-sand-300 text-2xl"></i>
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-coral-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-times-circle text-coral-600 text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-sand-700">No Traceability</p>
+                        <p class="text-xs text-sand-400">Audit fails</p>
+                    </div>
+                </div>
+                <div class="mt-8 p-4 bg-coral-50 rounded-xl border border-coral-200">
+                    <p class="text-center text-coral-700 font-medium"><i class="fas fa-exclamation-circle mr-2"></i>Result: 15-25% spoilage, compliance penalties, rejected EU shipments, and broken trust with international buyers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Solution Overview -->
+    <section id="solution" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-sea-600 font-semibold text-sm uppercase tracking-wider">Our Solution</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">Voice-First Traceability</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">Meet people where they are - speaking their language, using their tools, respecting their reality.</p>
+            </div>
+
+            <!-- Key Differentiators -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <div class="bg-gradient-to-br from-ocean-50 to-ocean-100 rounded-2xl p-6 scroll-reveal">
+                    <div class="w-12 h-12 bg-ocean-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-microphone text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">Voice Input</h3>
+                    <p class="text-sm text-sand-600">Fishermen and agents send WhatsApp voice notes in any language. No typing needed.</p>
+                </div>
+                <div class="bg-gradient-to-br from-sea-50 to-sea-100 rounded-2xl p-6 scroll-reveal">
+                    <div class="w-12 h-12 bg-sea-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-language text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">22 Languages</h3>
+                    <p class="text-sm text-sand-600">Bhashini-powered ASR and translation. Tamil, Telugu, Malayalam, Kannada, and more.</p>
+                </div>
+                <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 scroll-reveal">
+                    <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">AI Risk Score</h3>
+                    <p class="text-sm text-sand-600">Explainable spoilage prediction using weather, route, and temperature data. Not black-box ML.</p>
+                </div>
+                <div class="bg-gradient-to-br from-coral-50 to-coral-100 rounded-2xl p-6 scroll-reveal">
+                    <div class="w-12 h-12 bg-coral-500 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">Zero Hardware</h3>
+                    <p class="text-sm text-sand-600">No IoT devices, no sensors, no installation. Just WhatsApp and a web dashboard.</p>
+                </div>
+            </div>
+
+            <!-- The Story -->
+            <div class="bg-sand-50 rounded-3xl p-8 md:p-12 scroll-reveal">
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-10 h-10 bg-ocean-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book-open text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-sand-800">The Story: Ganesh and Raju</h3>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-ocean-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="font-bold text-ocean-700">1</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Ganesh Pre-Arrival Ping</h4>
+                                <p class="text-sand-600 text-sm mt-1">Ganesh, a fisherman from Rameswaram, sends a WhatsApp voice note: "Anna, 120kg seer fish, arriving in 45 minutes." This goes ONLY to his trusted buyer, Coastal Exports - never to competitors.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-sea-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="font-bold text-sea-700">2</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Raju at the Harbour</h4>
+                                <p class="text-sand-600 text-sm mt-1">Raju, the procurement agent, receives the ping on his dashboard. He knows exactly what to expect before the auction even starts. He sends a voice note confirming the catch details.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="font-bold text-amber-700">3</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">AI Processing</h4>
+                                <p class="text-sand-600 text-sm mt-1">Bhashini transcribes Tamil to English. Groq (Llama 3) extracts structured data: species, weight, estimated arrival. A batch record is auto-created with MPEDA-compliant KDE fields.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-coral-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="font-bold text-coral-700">4</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Risk Prediction</h4>
+                                <p class="text-sand-600 text-sm mt-1">Open-Meteo weather data + route simulation + temperature stream = real-time spoilage risk score. If risk crosses 30%, the exporter gets an alert to reroute or expedite.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="bg-white rounded-2xl shadow-xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-sm font-semibold text-sand-600">Conversation Flow</span>
+                                <span class="text-xs bg-sea-100 text-sea-700 px-2 py-1 rounded-full">WhatsApp</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-ocean-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-ship text-ocean-700 text-xs"></i>
+                                    </div>
+                                    <div class="bg-ocean-50 rounded-2xl rounded-tl-none p-3 max-w-xs">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <div class="w-6 h-4 bg-ocean-300 rounded flex items-center justify-center">
+                                                <div class="flex space-x-0.5">
+                                                    <div class="w-0.5 h-2 bg-white rounded-full animate-pulse"></div>
+                                                    <div class="w-0.5 h-3 bg-white rounded-full animate-pulse" style="animation-delay:0.1s"></div>
+                                                    <div class="w-0.5 h-2 bg-white rounded-full animate-pulse" style="animation-delay:0.2s"></div>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs text-ocean-600">0:08</span>
+                                        </div>
+                                        <p class="text-xs text-ocean-700 mt-1">Ganesh: "Anna, 120kg seer fish, 45 min"</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3 flex-row-reverse">
+                                    <div class="w-8 h-8 bg-sea-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-warehouse text-sea-700 text-xs"></i>
+                                    </div>
+                                    <div class="bg-sea-50 rounded-2xl rounded-tr-none p-3 max-w-xs">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <div class="w-6 h-4 bg-sea-300 rounded flex items-center justify-center">
+                                                <div class="flex space-x-0.5">
+                                                    <div class="w-0.5 h-2 bg-white rounded-full animate-pulse"></div>
+                                                    <div class="w-0.5 h-3 bg-white rounded-full animate-pulse" style="animation-delay:0.1s"></div>
+                                                    <div class="w-0.5 h-2 bg-white rounded-full animate-pulse" style="animation-delay:0.2s"></div>
+                                                </div>
+                                            </div>
+                                            <span class="text-xs text-sea-600">0:12</span>
+                                        </div>
+                                        <p class="text-xs text-sea-700 mt-1">Raju: "Confirmed. Auction lot #4421. QC ready."</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-center">
+                                    <span class="text-xs text-sand-400 bg-sand-100 px-3 py-1 rounded-full">AI processed in 2.3 seconds</span>
+                                </div>
+                                <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-robot text-amber-600"></i>
+                                        <span class="text-xs font-semibold text-amber-700">System Alert</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-1">Risk Score: 12% - Low. Weather clear. Route optimal.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Workflow Section -->
+    <section id="workflow" class="py-20 bg-sand-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-ocean-600 font-semibold text-sm uppercase tracking-wider">End-to-End Workflow</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">Six-Node Custody Chain</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">From boat deck to export dock. Built for hackathon. Simulated for demo. Roadmap for production.</p>
+            </div>
+
+            <!-- Node Status Legend -->
+            <div class="flex justify-center space-x-6 mb-12">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-sea-500 rounded-full"></span>
+                    <span class="text-sm text-sand-600"><span class="font-semibold">Green</span> = Built for Hackathon</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-amber-500 rounded-full"></span>
+                    <span class="text-sm text-sand-600"><span class="font-semibold">Yellow</span> = Simulated for Demo</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-sand-400 rounded-full"></span>
+                    <span class="text-sm text-sand-600"><span class="font-semibold">Grey</span> = Roadmap</span>
+                </div>
+            </div>
+
+            <!-- Interactive Workflow Diagram -->
+            <div class="bg-white rounded-3xl shadow-xl p-8 mb-12 scroll-reveal">
+                <div class="relative overflow-x-auto">
+                    <div class="min-w-[800px] flex items-center justify-between py-8">
+                        <!-- Node 1: Fisherman -->
+                        <div class="flex flex-col items-center group cursor-pointer" onclick="showNodeDetail(1)">
+                            <div class="w-20 h-20 bg-sea-500 rounded-2xl flex items-center justify-center shadow-lg mb-3 group-hover:scale-110 transition">
+                                <i class="fas fa-ship text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-sea-100 text-sea-700 px-2 py-1 rounded-full mb-1">BUILT</span>
+                            <span class="text-sm font-bold text-sand-800">Ganesh</span>
+                            <span class="text-xs text-sand-500">Fisherman</span>
+                            <span class="text-xs text-sea-600 mt-1">Pre-arrival ping</span>
+                        </div>
+
+                        <div class="flex-1 h-1 bg-gradient-to-r from-sea-400 to-amber-400 mx-4 relative">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-xs text-sand-400">Voice Note</div>
+                        </div>
+
+                        <!-- Node 2: Procurement Agent -->
+                        <div class="flex flex-col items-center group cursor-pointer" onclick="showNodeDetail(2)">
+                            <div class="w-20 h-20 bg-sea-500 rounded-2xl flex items-center justify-center shadow-lg mb-3 group-hover:scale-110 transition">
+                                <i class="fas fa-warehouse text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-sea-100 text-sea-700 px-2 py-1 rounded-full mb-1">BUILT</span>
+                            <span class="text-sm font-bold text-sand-800">Raju</span>
+                            <span class="text-xs text-sand-500">Procurement Agent</span>
+                            <span class="text-xs text-sea-600 mt-1">Auction and QC</span>
+                        </div>
+
+                        <div class="flex-1 h-1 bg-gradient-to-r from-sea-400 to-amber-400 mx-4 relative">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-xs text-sand-400">Batch Record</div>
+                        </div>
+
+                        <!-- Node 3: Truck Driver -->
+                        <div class="flex flex-col items-center group cursor-pointer" onclick="showNodeDetail(3)">
+                            <div class="w-20 h-20 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg mb-3 group-hover:scale-110 transition">
+                                <i class="fas fa-truck text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full mb-1">SIMULATED</span>
+                            <span class="text-sm font-bold text-sand-800">Joseph</span>
+                            <span class="text-xs text-sand-500">Truck Driver</span>
+                            <span class="text-xs text-amber-600 mt-1">Temp: 2C</span>
+                        </div>
+
+                        <div class="flex-1 h-1 bg-gradient-to-r from-amber-400 to-sand-400 mx-4 relative">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-xs text-sand-400">Transit</div>
+                        </div>
+
+                        <!-- Node 4: Processing Plant -->
+                        <div class="flex flex-col items-center group cursor-pointer" onclick="showNodeDetail(4)">
+                            <div class="w-20 h-20 bg-sand-400 rounded-2xl flex items-center justify-center shadow-lg mb-3 group-hover:scale-110 transition">
+                                <i class="fas fa-industry text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-sand-200 text-sand-600 px-2 py-1 rounded-full mb-1">ROADMAP</span>
+                            <span class="text-sm font-bold text-sand-800">Plant Staff</span>
+                            <span class="text-xs text-sand-500">Processing</span>
+                            <span class="text-xs text-sand-500 mt-1">QC, Grading, Pack</span>
+                        </div>
+
+                        <div class="flex-1 h-1 bg-gradient-to-r from-sand-400 to-amber-400 mx-4 relative">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-xs text-sand-400">Cold Chain</div>
+                        </div>
+
+                        <!-- Node 5: Transit Vehicle -->
+                        <div class="flex flex-col items-center group cursor-pointer" onclick="showNodeDetail(5)">
+                            <div class="w-20 h-20 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg mb-3 group-hover:scale-110 transition">
+                                <i class="fas fa-shipping-fast text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full mb-1">SIMULATED</span>
+                            <span class="text-sm font-bold text-sand-800">Transit</span>
+                            <span class="text-xs text-sand-500">Plant to Port</span>
+                            <span class="text-xs text-amber-600 mt-1">Route + Weather</span>
+                        </div>
+
+                        <div class="flex-1 h-1 bg-gradient-to-r from-amber-400 to-sand-400 mx-4 relative">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-xs text-sand-400">Export</div>
+                        </div>
+
+                        <!-- Node 6: Port Handler -->
+                        <div class="flex flex-col items-center group cursor-pointer" onclick="showNodeDetail(6)">
+                            <div class="w-20 h-20 bg-sand-400 rounded-2xl flex items-center justify-center shadow-lg mb-3 group-hover:scale-110 transition">
+                                <i class="fas fa-plane-departure text-white text-2xl"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-sand-200 text-sand-600 px-2 py-1 rounded-full mb-1">ROADMAP</span>
+                            <span class="text-sm font-bold text-sand-800">Port Handler</span>
+                            <span class="text-xs text-sand-500">Final Export</span>
+                            <span class="text-xs text-sand-500 mt-1">MPEDA Cert</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Node Detail Cards -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-sea-500 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-sea-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-ship text-sea-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Node 1: Fisherman</h4>
+                                <span class="text-xs bg-sea-100 text-sea-700 px-2 py-0.5 rounded-full">BUILT</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-sm text-sand-600">
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>WhatsApp voice note input</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>Private ping (one-to-one, not public)</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>30-60 min advance visibility</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>No catch/price/identity in payload</span></li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-ocean-50 rounded-lg">
+                        <p class="text-xs text-ocean-700"><strong>Tech:</strong> WhatsApp Cloud API (Evolution API fallback), Bhashini ASR</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-sea-500 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-sea-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-warehouse text-sea-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Node 2: Procurement Agent</h4>
+                                <span class="text-xs bg-sea-100 text-sea-700 px-2 py-0.5 rounded-full">BUILT</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-sm text-sand-600">
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>Voice note confirmation</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>Auto batch record creation</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>MPEDA KDE alignment</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-check text-sea-500 mt-1"></i><span>Ping-to-batch matching logic</span></li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-ocean-50 rounded-lg">
+                        <p class="text-xs text-ocean-700"><strong>Tech:</strong> Groq Llama 3, Structured extraction, PostgreSQL</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-amber-500 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-truck text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Node 3: Truck Driver</h4>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">SIMULATED</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-sm text-sand-600">
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Scripted "dispatched" event</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Simulated temperature stream</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Injectable failure scenarios</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>No actual driver app (backend real)</span></li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-amber-50 rounded-lg">
+                        <p class="text-xs text-amber-700"><strong>Demo:</strong> Simulated data with "Simulated" badge on dashboard</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-sand-400 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-sand-200 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-industry text-sand-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Node 4: Processing Plant</h4>
+                                <span class="text-xs bg-sand-200 text-sand-600 px-2 py-0.5 rounded-full">ROADMAP</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-sm text-sand-600">
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>Quality control and grading</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>Packaging and labeling</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>Batch consolidation</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>Temp monitoring during processing</span></li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-sand-100 rounded-lg">
+                        <p class="text-xs text-sand-600"><strong>Future:</strong> Plant staff mobile app with QC checklist</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-amber-500 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shipping-fast text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Node 5: Transit Vehicle</h4>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">SIMULATED</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-sm text-sand-600">
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Route simulation</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Weather integration (Open-Meteo)</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Estimated arrival time</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-circle text-amber-500 mt-1 text-xs"></i><span>Spoilage risk calculation</span></li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-amber-50 rounded-lg">
+                        <p class="text-xs text-amber-700"><strong>Demo:</strong> Simulated with weather API integration</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-sand-400 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-sand-200 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-plane-departure text-sand-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sand-800">Node 6: Port Handler</h4>
+                                <span class="text-xs bg-sand-200 text-sand-600 px-2 py-0.5 rounded-full">ROADMAP</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-sm text-sand-600">
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>Final handoff confirmation</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>MPEDA certificate auto-generation</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>EU-IUU compliance check</span></li>
+                        <li class="flex items-start space-x-2"><i class="fas fa-clock text-sand-400 mt-1"></i><span>Complete chain of custody record</span></li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-sand-100 rounded-lg">
+                        <p class="text-xs text-sand-600"><strong>Future:</strong> Port authority API integration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-ocean-600 font-semibold text-sm uppercase tracking-wider">Technical Architecture</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">Stack and APIs</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">Low-cost, scalable, and defensible. Built for hackathon speed, ready for production scale.</p>
+            </div>
+
+            <!-- API Stack Cards -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-bolt text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full font-semibold">FREE TIER OK</span>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-1">Groq Cloud</h3>
+                    <p class="text-xs text-sand-500 mb-3">LLM Inference</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-sand-600">Free Tier</span><span class="font-semibold text-green-700">20 req/min</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Model</span><span class="font-semibold text-sand-700">Llama 3</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Daily Cap</span><span class="font-semibold text-sand-700">28,800 req</span></div>
+                    </div>
+                    <div class="mt-4 p-2 bg-green-200 rounded-lg text-center">
+                        <span class="text-xs text-green-800 font-semibold">Verified for 2026</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 border border-amber-200 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded-full font-semibold">COST-EFFECTIVE</span>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-1">WhatsApp Cloud API</h3>
+                    <p class="text-xs text-sand-500 mb-3">Messaging Channel</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-sand-600">Service Replies</span><span class="font-semibold text-green-700">FREE*</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Templates (India)</span><span class="font-semibold text-amber-700">~$0.002-0.009</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Fallback</span><span class="font-semibold text-sand-700">Evolution API</span></div>
+                    </div>
+                    <div class="mt-4 p-2 bg-amber-200 rounded-lg text-center">
+                        <span class="text-xs text-amber-800 font-semibold">Updated 2026 Pricing</span>
+                    </div>
+                    <p class="text-xs text-sand-400 mt-2">*Free within 24h customer-initiated window</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-ocean-50 to-ocean-100 rounded-2xl p-6 border border-ocean-200 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-ocean-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-language text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs bg-ocean-200 text-ocean-800 px-2 py-1 rounded-full font-semibold">GOVT BACKED</span>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-1">Bhashini</h3>
+                    <p class="text-xs text-sand-500 mb-3">ASR and Translation</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-sand-600">Free Tier</span><span class="font-semibold text-ocean-700">1M chars/month</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Languages</span><span class="font-semibold text-sand-700">22 Indian</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Fallback</span><span class="font-semibold text-sand-700">AI4Bharat</span></div>
+                    </div>
+                    <div class="mt-4 p-2 bg-ocean-200 rounded-lg text-center">
+                        <span class="text-xs text-ocean-800 font-semibold">Unverified for 2026</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-coral-50 to-coral-100 rounded-2xl p-6 border border-coral-200 scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-coral-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-cloud-sun text-white text-xl"></i>
+                        </div>
+                        <span class="text-xs bg-coral-200 text-coral-800 px-2 py-1 rounded-full font-semibold">NON-COMMERCIAL</span>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-1">Open-Meteo</h3>
+                    <p class="text-xs text-sand-500 mb-3">Weather Data</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-sand-600">Free Tier</span><span class="font-semibold text-coral-700">10K calls/day</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">License</span><span class="font-semibold text-coral-700">CC BY 4.0</span></div>
+                        <div class="flex justify-between"><span class="text-sand-600">Commercial</span><span class="font-semibold text-coral-700">Requires Paid</span></div>
+                    </div>
+                    <div class="mt-4 p-2 bg-coral-200 rounded-lg text-center">
+                        <span class="text-xs text-coral-800 font-semibold">Non-Commercial Only</span>
+                    </div>
+                    <p class="text-xs text-sand-400 mt-2">Commercial: API Standard ~30-50 EUR/mo</p>
+                </div>
+            </div>
+
+            <!-- System Architecture Diagram -->
+            <div class="bg-sand-50 rounded-3xl p-8 scroll-reveal">
+                <h3 class="text-2xl font-bold text-sand-800 mb-8 text-center">System Architecture Flow</h3>
+                <div class="flex flex-col items-center space-y-6">
+                    <!-- Layer 1: Input -->
+                    <div class="w-full max-w-4xl">
+                        <div class="text-sm font-semibold text-sand-500 mb-3 uppercase tracking-wider">Input Layer</div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-ocean-200">
+                                <i class="fab fa-whatsapp text-ocean-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">WhatsApp Voice</p>
+                                <p class="text-xs text-sand-400">Fisherman / Agent</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-ocean-200">
+                                <i class="fas fa-globe text-ocean-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Web Form</p>
+                                <p class="text-xs text-sand-400">Fallback Input</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-ocean-200">
+                                <i class="fas fa-cloud-sun text-ocean-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Weather API</p>
+                                <p class="text-xs text-sand-400">Open-Meteo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <i class="fas fa-arrow-down text-sand-300 text-2xl"></i>
+
+                    <!-- Layer 2: Processing -->
+                    <div class="w-full max-w-4xl">
+                        <div class="text-sm font-semibold text-sand-500 mb-3 uppercase tracking-wider">Processing Layer</div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-sea-200">
+                                <i class="fas fa-language text-sea-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Bhashini ASR</p>
+                                <p class="text-xs text-sand-400">Speech to Text</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-sea-200">
+                                <i class="fas fa-brain text-sea-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Groq Llama 3</p>
+                                <p class="text-xs text-sand-400">NLP Extraction</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-sea-200">
+                                <i class="fas fa-calculator text-sea-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Risk Engine</p>
+                                <p class="text-xs text-sand-400">Explainable Formula</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <i class="fas fa-arrow-down text-sand-300 text-2xl"></i>
+
+                    <!-- Layer 3: Storage -->
+                    <div class="w-full max-w-4xl">
+                        <div class="text-sm font-semibold text-sand-500 mb-3 uppercase tracking-wider">Data Layer</div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-amber-200">
+                                <i class="fas fa-database text-amber-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">PostgreSQL</p>
+                                <p class="text-xs text-sand-400">Batch Records</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-amber-200">
+                                <i class="fas fa-file-alt text-amber-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">MPEDA KDE</p>
+                                <p class="text-xs text-sand-400">Compliance Fields</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-amber-200">
+                                <i class="fas fa-history text-amber-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Audit Trail</p>
+                                <p class="text-xs text-sand-400">Immutable Logs</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <i class="fas fa-arrow-down text-sand-300 text-2xl"></i>
+
+                    <!-- Layer 4: Output -->
+                    <div class="w-full max-w-4xl">
+                        <div class="text-sm font-semibold text-sand-500 mb-3 uppercase tracking-wider">Output Layer</div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-coral-200">
+                                <i class="fas fa-chart-line text-coral-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Live Dashboard</p>
+                                <p class="text-xs text-sand-400">Real-time Visibility</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-coral-200">
+                                <i class="fas fa-bell text-coral-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">Risk Alerts</p>
+                                <p class="text-xs text-sand-400">WhatsApp + Dashboard</p>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow text-center border-2 border-coral-200">
+                                <i class="fas fa-certificate text-coral-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-semibold text-sand-700">MPEDA Cert</p>
+                                <p class="text-xs text-sand-400">Auto-Generated</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Build Timeline -->
+            <div class="mt-12 bg-white rounded-3xl p-8 shadow-lg scroll-reveal">
+                <h3 class="text-2xl font-bold text-sand-800 mb-8 text-center">48-Hour Hackathon Build Plan</h3>
+                <div class="relative">
+                    <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-ocean-200"></div>
+                    <div class="space-y-8">
+                        <div class="flex items-center justify-between">
+                            <div class="w-5/12 text-right pr-8">
+                                <h4 class="font-bold text-sand-800">Hours 0-4: Foundation</h4>
+                                <p class="text-sm text-sand-500">WhatsApp test app, web form fallback, PostgreSQL schema</p>
+                            </div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-8 h-8 bg-ocean-500 rounded-full flex items-center justify-center z-10">
+                                    <span class="text-white text-xs font-bold">1</span>
+                                </div>
+                            </div>
+                            <div class="w-5/12 pl-8">
+                                <span class="text-xs bg-ocean-100 text-ocean-700 px-2 py-1 rounded-full">Critical: Add web form fallback for WhatsApp verification delays</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="w-5/12 text-right pr-8">
+                                <span class="text-xs bg-sea-100 text-sea-700 px-2 py-1 rounded-full">Add ping-to-batch matching logic</span>
+                            </div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-8 h-8 bg-sea-500 rounded-full flex items-center justify-center z-10">
+                                    <span class="text-white text-xs font-bold">2</span>
+                                </div>
+                            </div>
+                            <div class="w-5/12 pl-8">
+                                <h4 class="font-bold text-sand-800">Hours 4-16: Ping Relay + NLP</h4>
+                                <p class="text-sm text-sand-500">Bhashini ASR, Groq extraction, batch record creation</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="w-5/12 text-right pr-8">
+                                <h4 class="font-bold text-sand-800">Hours 16-28: Dashboard</h4>
+                                <p class="text-sm text-sand-500">Real-time tiles, node timeline, data provenance badges</p>
+                            </div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center z-10">
+                                    <span class="text-white text-xs font-bold">3</span>
+                                </div>
+                            </div>
+                            <div class="w-5/12 pl-8">
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">Add Simulated/Real badges</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="w-5/12 text-right pr-8">
+                                <span class="text-xs bg-coral-100 text-coral-700 px-2 py-1 rounded-full">Explain risk formula to judges</span>
+                            </div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-8 h-8 bg-coral-500 rounded-full flex items-center justify-center z-10">
+                                    <span class="text-white text-xs font-bold">4</span>
+                                </div>
+                            </div>
+                            <div class="w-5/12 pl-8">
+                                <h4 class="font-bold text-sand-800">Hours 28-40: Risk Layer</h4>
+                                <p class="text-sm text-sand-500">Open-Meteo integration, risk formula, alert system</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="w-5/12 text-right pr-8">
+                                <h4 class="font-bold text-sand-800">Hours 40-48: Pitch Prep</h4>
+                                <p class="text-sm text-sand-500">Six-node diagram, Q&A prep, story narrative</p>
+                            </div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-8 h-8 bg-ocean-500 rounded-full flex items-center justify-center z-10">
+                                    <span class="text-white text-xs font-bold">5</span>
+                                </div>
+                            </div>
+                            <div class="w-5/12 pl-8">
+                                <span class="text-xs bg-ocean-100 text-ocean-700 px-2 py-1 rounded-full">Add architecture diagram slide</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Financials Section -->
+    <section id="financials" class="py-20 bg-sand-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-coral-600 font-semibold text-sm uppercase tracking-wider">Business Model</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">Profit and Loss Analysis</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">Cost-effective at scale. Under 1% of spoilage savings in API costs.</p>
+            </div>
+
+            <!-- P&L Overview Cards -->
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white rounded-2xl p-8 shadow-lg card-hover scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-sand-800">Monthly API Costs</h3>
+                        <span class="text-xs bg-coral-100 text-coral-700 px-2 py-1 rounded-full">At 200 shipments/month</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">WhatsApp (template messages)</span>
+                            <span class="font-semibold text-sand-800">~$50-180</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">Groq (LLM inference)</span>
+                            <span class="font-semibold text-sand-800">~$5-10</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">Bhashini (ASR/translation)</span>
+                            <span class="font-semibold text-sand-800">~$10-40</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">Open-Meteo (commercial)</span>
+                            <span class="font-semibold text-sand-800">~$35-50</span>
+                        </div>
+                        <div class="border-t pt-3 flex justify-between items-center">
+                            <span class="font-bold text-sand-800">Total Monthly API Cost</span>
+                            <span class="font-bold text-coral-600 text-xl">~$100-280</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-sand-500">In INR (approx)</span>
+                            <span class="font-semibold text-sand-700">~Rs.8,400-23,500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg card-hover scroll-reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-sand-800">Spoilage Savings</h3>
+                        <span class="text-xs bg-sea-100 text-sea-700 px-2 py-1 rounded-full">Per 200 shipments</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">Average shipment value</span>
+                            <span class="font-semibold text-sand-800">~Rs.2.5L</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">Current spoilage rate</span>
+                            <span class="font-semibold text-coral-600">15-25%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">With CoastalTrace</span>
+                            <span class="font-semibold text-sea-600">5-8%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-sand-600">Spoilage reduction</span>
+                            <span class="font-semibold text-sea-600">10-17 percentage points</span>
+                        </div>
+                        <div class="border-t pt-3 flex justify-between items-center">
+                            <span class="font-bold text-sand-800">Monthly Savings</span>
+                            <span class="font-bold text-sea-600 text-xl">~Rs.5-8.5L</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-sand-500">Annual savings</span>
+                            <span class="font-semibold text-sea-700">~Rs.60L-1Cr</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-sea-50 to-sea-100 rounded-2xl p-8 shadow-lg card-hover scroll-reveal border-2 border-sea-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-sand-800">ROI Summary</h3>
+                        <span class="text-xs bg-sea-200 text-sea-800 px-2 py-1 rounded-full">Per Exporter</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="text-center">
+                            <span class="text-5xl font-bold text-sea-600">35x</span>
+                            <p class="text-sm text-sand-600 mt-1">Return on Investment</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-sand-600">API cost per shipment</span>
+                                <span class="font-semibold text-sand-800">~Rs.40-120</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-sand-600">Savings per shipment</span>
+                                <span class="font-semibold text-sea-600">~Rs.2,500-4,250</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-sand-500">API cost is less than 1% of spoilage savings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white rounded-2xl p-6 shadow-lg scroll-reveal">
+                    <h3 class="text-lg font-bold text-sand-800 mb-4">Cost Breakdown (Monthly)</h3>
+                    <canvas id="costChart" width="400" height="300"></canvas>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg scroll-reveal">
+                    <h3 class="text-lg font-bold text-sand-800 mb-4">Spoilage Reduction Impact</h3>
+                    <canvas id="savingsChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Revenue Model -->
+            <div class="bg-white rounded-3xl p-8 shadow-lg scroll-reveal">
+                <h3 class="text-2xl font-bold text-sand-800 mb-8 text-center">Revenue Model Options</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="border-2 border-ocean-200 rounded-xl p-6 hover:border-ocean-400 transition">
+                        <div class="text-center mb-4">
+                            <span class="text-3xl font-bold text-ocean-600">Free</span>
+                            <p class="text-sm text-sand-500 mt-1">Pilot / Hackathon</p>
+                        </div>
+                        <ul class="space-y-2 text-sm text-sand-600">
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Free tier APIs only</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Up to 50 shipments/month</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Basic dashboard</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Community support</span></li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-sea-300 rounded-xl p-6 bg-sea-50 relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-sea-500 text-white text-xs px-3 py-1 rounded-full">RECOMMENDED</div>
+                        <div class="text-center mb-4">
+                            <span class="text-3xl font-bold text-sea-600">Rs.5,000</span>
+                            <p class="text-sm text-sand-500 mt-1">/month per exporter</p>
+                        </div>
+                        <ul class="space-y-2 text-sm text-sand-600">
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Unlimited shipments</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Full 6-node chain</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Priority API access</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>MPEDA auto-compliance</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>24/7 support</span></li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-amber-200 rounded-xl p-6 hover:border-amber-400 transition">
+                        <div class="text-center mb-4">
+                            <span class="text-3xl font-bold text-amber-600">Enterprise</span>
+                            <p class="text-sm text-sand-500 mt-1">Custom pricing</p>
+                        </div>
+                        <ul class="space-y-2 text-sm text-sand-600">
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Multi-exporter dashboard</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Custom integrations</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>Dedicated infrastructure</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>SLA guarantees</span></li>
+                            <li class="flex items-center space-x-2"><i class="fas fa-check text-sea-500"></i><span>On-premise option</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Live Demo Dashboard -->
+    <section id="demo" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-sea-600 font-semibold text-sm uppercase tracking-wider">Interactive Demo</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">Live Dashboard Preview</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">Experience the real-time traceability dashboard with simulated data.</p>
+            </div>
+
+            <!-- Dashboard Container -->
+            <div class="bg-sand-800 rounded-3xl p-4 md:p-8 shadow-2xl scroll-reveal">
+                <!-- Dashboard Header -->
+                <div class="flex flex-wrap items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                        <div class="w-10 h-10 bg-ocean-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-fish text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-bold text-lg">CoastalTrace Dashboard</h3>
+                            <p class="text-sand-400 text-xs">Coastal Exports Pvt Ltd - Rameswaram Hub</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-sea-400 rounded-full animate-pulse"></span>
+                            <span class="text-sand-300 text-sm">Live</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-white font-bold" id="currentTime">10:45 AM</p>
+                            <p class="text-sand-400 text-xs">02 July 2026</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-sand-700 rounded-xl p-4">
+                        <p class="text-sand-400 text-xs mb-1">Active Batches</p>
+                        <p class="text-white text-2xl font-bold">12</p>
+                        <p class="text-sea-400 text-xs mt-1"><i class="fas fa-arrow-up mr-1"></i>+3 today</p>
+                    </div>
+                    <div class="bg-sand-700 rounded-xl p-4">
+                        <p class="text-sand-400 text-xs mb-1">Avg Risk Score</p>
+                        <p class="text-white text-2xl font-bold">18%</p>
+                        <p class="text-sea-400 text-xs mt-1"><i class="fas fa-arrow-down mr-1"></i>-5% vs yesterday</p>
+                    </div>
+                    <div class="bg-sand-700 rounded-xl p-4">
+                        <p class="text-sand-400 text-xs mb-1">Pending Alerts</p>
+                        <p class="text-white text-2xl font-bold">2</p>
+                        <p class="text-amber-400 text-xs mt-1"><i class="fas fa-exclamation mr-1"></i>Action needed</p>
+                    </div>
+                    <div class="bg-sand-700 rounded-xl p-4">
+                        <p class="text-sand-400 text-xs mb-1">MPEDA Ready</p>
+                        <p class="text-white text-2xl font-bold">8</p>
+                        <p class="text-sea-400 text-xs mt-1"><i class="fas fa-check mr-1"></i>Certified</p>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Left: Batch List -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-white font-semibold">Active Shipments</h4>
+                            <div class="flex space-x-2">
+                                <button class="text-xs bg-ocean-600 text-white px-3 py-1 rounded-full">All</button>
+                                <button class="text-xs bg-sand-700 text-sand-300 px-3 py-1 rounded-full hover:bg-sand-600">High Risk</button>
+                                <button class="text-xs bg-sand-700 text-sand-300 px-3 py-1 rounded-full hover:bg-sand-600">En Route</button>
+                            </div>
+                        </div>
+
+                        <!-- Batch Card 1 -->
+                        <div class="bg-sand-700 rounded-xl p-4 border-l-4 border-sea-500">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-ocean-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-ship text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white font-semibold text-sm">Batch #SE-2026-04421</p>
+                                        <p class="text-sand-400 text-xs">Seer Fish - 120kg - Ganesh</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs bg-sea-900 text-sea-400 px-2 py-1 rounded-full">Low Risk</span>
+                            </div>
+                            <div class="flex items-center space-x-4 text-xs text-sand-400 mb-3">
+                                <span><i class="fas fa-map-marker-alt mr-1 text-ocean-400"></i>Rameswaram Harbour</span>
+                                <span><i class="fas fa-clock mr-1 text-amber-400"></i>ETA: 11:30 AM</span>
+                                <span><i class="fas fa-thermometer-half mr-1 text-coral-400"></i>2C</span>
+                            </div>
+                            <!-- Progress Bar -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between text-xs text-sand-500 mb-1">
+                                    <span>Boat</span>
+                                    <span>Harbour</span>
+                                    <span>Transit</span>
+                                    <span>Plant</span>
+                                    <span>Port</span>
+                                </div>
+                                <div class="h-2 bg-sand-600 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-sea-500 to-ocean-500 rounded-full" style="width: 35%"></div>
+                                </div>
+                                <div class="flex justify-between mt-1">
+                                    <div class="w-3 h-3 bg-sea-500 rounded-full -mt-2.5 relative">
+                                        <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-sea-400">Done</div>
+                                    </div>
+                                    <div class="w-3 h-3 bg-ocean-500 rounded-full -mt-2.5 relative animate-pulse">
+                                        <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-ocean-400">Active</div>
+                                    </div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5 relative"></div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5 relative"></div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5 relative"></div>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex items-center space-x-2">
+                                <span class="text-xs bg-sea-900 text-sea-400 px-2 py-1 rounded">REAL</span>
+                                <span class="text-xs bg-ocean-900 text-ocean-400 px-2 py-1 rounded">Voice Note</span>
+                                <span class="text-xs bg-amber-900 text-amber-400 px-2 py-1 rounded">Tamil</span>
+                            </div>
+                        </div>
+
+                        <!-- Batch Card 2 -->
+                        <div class="bg-sand-700 rounded-xl p-4 border-l-4 border-amber-500">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-truck text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-white font-semibold text-sm">Batch #SE-2026-04420</p>
+                                        <p class="text-sand-400 text-xs">Prawns - 85kg - Joseph (Simulated)</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs bg-amber-900 text-amber-400 px-2 py-1 rounded-full">Medium Risk</span>
+                            </div>
+                            <div class="flex items-center space-x-4 text-xs text-sand-400 mb-3">
+                                <span><i class="fas fa-map-marker-alt mr-1 text-ocean-400"></i>En Route to Plant</span>
+                                <span><i class="fas fa-clock mr-1 text-amber-400"></i>ETA: 1:15 PM</span>
+                                <span><i class="fas fa-thermometer-half mr-1 text-coral-400"></i>4C (Rising)</span>
+                            </div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between text-xs text-sand-500 mb-1">
+                                    <span>Boat</span>
+                                    <span>Harbour</span>
+                                    <span>Transit</span>
+                                    <span>Plant</span>
+                                    <span>Port</span>
+                                </div>
+                                <div class="h-2 bg-sand-600 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-sea-500 via-ocean-500 to-amber-500 rounded-full" style="width: 55%"></div>
+                                </div>
+                                <div class="flex justify-between mt-1">
+                                    <div class="w-3 h-3 bg-sea-500 rounded-full -mt-2.5"></div>
+                                    <div class="w-3 h-3 bg-sea-500 rounded-full -mt-2.5"></div>
+                                    <div class="w-3 h-3 bg-amber-500 rounded-full -mt-2.5 relative animate-pulse">
+                                        <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-amber-400">Active</div>
+                                    </div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5"></div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5"></div>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex items-center space-x-2">
+                                <span class="text-xs bg-amber-900 text-amber-400 px-2 py-1 rounded">SIMULATED</span>
+                                <span class="text-xs bg-coral-900 text-coral-400 px-2 py-1 rounded">Temp Alert</span>
+                                <span class="text-xs bg-ocean-900 text-ocean-400 px-2 py-1 rounded">Route Delay</span>
+                            </div>
+                            <div class="mt-3 p-2 bg-coral-900/50 rounded-lg border border-coral-700">
+                                <p class="text-xs text-coral-300"><i class="fas fa-exclamation-triangle mr-1"></i>Risk increased from 12% to 28%. Temperature rise detected. Recommend expedited processing.</p>
+                            </div>
+                        </div>
+
+                        <!-- Batch Card 3 -->
+                        <div class="bg-sand-700 rounded-xl p-4 border-l-4 border-sand-500 opacity-70">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-sand-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-industry text-sand-300 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sand-300 font-semibold text-sm">Batch #SE-2026-04415</p>
+                                        <p class="text-sand-500 text-xs">Squid - 200kg - Plant Staff (Roadmap)</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs bg-sand-600 text-sand-400 px-2 py-1 rounded-full">Processing</span>
+                            </div>
+                            <div class="flex items-center space-x-4 text-xs text-sand-500 mb-3">
+                                <span><i class="fas fa-map-marker-alt mr-1"></i>Processing Plant</span>
+                                <span><i class="fas fa-clock mr-1"></i>ETA: 3:00 PM</span>
+                                <span><i class="fas fa-thermometer-half mr-1"></i>-2C</span>
+                            </div>
+                            <div class="relative">
+                                <div class="flex items-center justify-between text-xs text-sand-600 mb-1">
+                                    <span>Boat</span>
+                                    <span>Harbour</span>
+                                    <span>Transit</span>
+                                    <span>Plant</span>
+                                    <span>Port</span>
+                                </div>
+                                <div class="h-2 bg-sand-600 rounded-full overflow-hidden">
+                                    <div class="h-full bg-sand-500 rounded-full" style="width: 70%"></div>
+                                </div>
+                                <div class="flex justify-between mt-1">
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5"></div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5"></div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5"></div>
+                                    <div class="w-3 h-3 bg-sand-500 rounded-full -mt-2.5 relative">
+                                        <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-xs text-sand-500">Roadmap</div>
+                                    </div>
+                                    <div class="w-3 h-3 bg-sand-600 rounded-full -mt-2.5"></div>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex items-center space-x-2">
+                                <span class="text-xs bg-sand-600 text-sand-400 px-2 py-1 rounded">ROADMAP</span>
+                                <span class="text-xs bg-sand-600 text-sand-400 px-2 py-1 rounded">Future Node</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Risk & Weather -->
+                    <div class="space-y-4">
+                        <!-- Risk Gauge -->
+                        <div class="bg-sand-700 rounded-xl p-4">
+                            <h4 class="text-white font-semibold text-sm mb-4">Risk Distribution</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-sand-400">Low Risk (0-20%)</span>
+                                        <span class="text-sea-400">8 batches</span>
+                                    </div>
+                                    <div class="h-2 bg-sand-600 rounded-full">
+                                        <div class="h-full bg-sea-500 rounded-full" style="width: 67%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-sand-400">Medium Risk (21-40%)</span>
+                                        <span class="text-amber-400">3 batches</span>
+                                    </div>
+                                    <div class="h-2 bg-sand-600 rounded-full">
+                                        <div class="h-full bg-amber-500 rounded-full" style="width: 25%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-sand-400">High Risk (41%+)</span>
+                                        <span class="text-coral-400">1 batch</span>
+                                    </div>
+                                    <div class="h-2 bg-sand-600 rounded-full">
+                                        <div class="h-full bg-coral-500 rounded-full" style="width: 8%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Weather Widget -->
+                        <div class="bg-gradient-to-br from-ocean-600 to-ocean-800 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-white font-semibold text-sm">Weather - Rameswaram</h4>
+                                <span class="text-xs bg-white/20 text-white px-2 py-1 rounded-full">Live</span>
+                            </div>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <i class="fas fa-sun text-amber-300 text-4xl"></i>
+                                <div>
+                                    <p class="text-white text-3xl font-bold">32C</p>
+                                    <p class="text-ocean-200 text-sm">Clear Sky</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-white/10 rounded-lg p-2">
+                                    <i class="fas fa-wind text-ocean-200 text-sm mb-1"></i>
+                                    <p class="text-white text-xs font-semibold">18 km/h</p>
+                                    <p class="text-ocean-200 text-xs">Wind</p>
+                                </div>
+                                <div class="bg-white/10 rounded-lg p-2">
+                                    <i class="fas fa-tint text-ocean-200 text-sm mb-1"></i>
+                                    <p class="text-white text-xs font-semibold">78%</p>
+                                    <p class="text-ocean-200 text-xs">Humidity</p>
+                                </div>
+                                <div class="bg-white/10 rounded-lg p-2">
+                                    <i class="fas fa-eye text-ocean-200 text-sm mb-1"></i>
+                                    <p class="text-white text-xs font-semibold">10 km</p>
+                                    <p class="text-ocean-200 text-xs">Visibility</p>
+                                </div>
+                            </div>
+                            <p class="text-ocean-200 text-xs mt-3"><i class="fas fa-info-circle mr-1"></i>Data: Open-Meteo (Non-commercial use)</p>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="bg-sand-700 rounded-xl p-4">
+                            <h4 class="text-white font-semibold text-sm mb-4">Recent Activity</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-sea-500 rounded-full mt-1.5"></div>
+                                    <div>
+                                        <p class="text-sand-300 text-xs">Ganesh sent voice note</p>
+                                        <p class="text-sand-500 text-xs">10:42 AM - Tamil to English</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-ocean-500 rounded-full mt-1.5"></div>
+                                    <div>
+                                        <p class="text-sand-300 text-xs">Batch #04421 created</p>
+                                        <p class="text-sand-500 text-xs">10:43 AM - Auto-extracted</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-amber-500 rounded-full mt-1.5"></div>
+                                    <div>
+                                        <p class="text-sand-300 text-xs">Risk alert: Batch #04420</p>
+                                        <p class="text-sand-500 text-xs">10:38 AM - Temp rising</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-coral-500 rounded-full mt-1.5"></div>
+                                    <div>
+                                        <p class="text-sand-300 text-xs">MPEDA cert generated</p>
+                                        <p class="text-sand-500 text-xs">10:15 AM - Batch #04418</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Analysis Section -->
+    <section id="analysis" class="py-20 bg-sand-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <span class="text-ocean-600 font-semibold text-sm uppercase tracking-wider">Strategic Analysis</span>
+                <h2 class="font-serif text-4xl md:text-5xl font-bold text-sand-800 mt-2 mb-4">Competitive Positioning</h2>
+                <p class="text-xl text-sand-500 max-w-3xl mx-auto">How we stack up against existing solutions and why now is the perfect time.</p>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden mb-12 scroll-reveal">
+                <div class="p-6 bg-gradient-to-r from-ocean-600 to-ocean-800">
+                    <h3 class="text-white font-bold text-xl">Feature Comparison Matrix</h3>
+                    <p class="text-ocean-200 text-sm">CoastalTrace vs. ShoreKart, Folio3, TraceX</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-sand-50">
+                                <th class="text-left p-4 text-sm font-semibold text-sand-700">Feature</th>
+                                <th class="text-center p-4 text-sm font-semibold text-sand-500">ShoreKart</th>
+                                <th class="text-center p-4 text-sm font-semibold text-sand-500">Folio3</th>
+                                <th class="text-center p-4 text-sm font-semibold text-sand-500">TraceX</th>
+                                <th class="text-center p-4 text-sm font-semibold text-ocean-700 bg-ocean-50">CoastalTrace</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            <tr class="border-t border-sand-100">
+                                <td class="p-4 font-medium text-sand-800">Voice Input</td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-times text-coral-500"></i></td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-times text-coral-500"></i></td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-times text-coral-500"></i></td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold"><i class="fas fa-check text-sea-500 mr-1"></i>Yes</td>
+                            </tr>
+                            <tr class="border-t border-sand-100 bg-sand-50/50">
+                                <td class="p-4 font-medium text-sand-800">Regional Languages</td>
+                                <td class="text-center p-4 text-sand-400">English only</td>
+                                <td class="text-center p-4 text-sand-400">English only</td>
+                                <td class="text-center p-4 text-sand-400">English only</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">22 languages</td>
+                            </tr>
+                            <tr class="border-t border-sand-100">
+                                <td class="p-4 font-medium text-sand-800">Earliest Signal</td>
+                                <td class="text-center p-4 text-sand-400">Plant gate</td>
+                                <td class="text-center p-4 text-sand-400">Plant gate</td>
+                                <td class="text-center p-4 text-sand-400">Plant gate</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Boat deck</td>
+                            </tr>
+                            <tr class="border-t border-sand-100 bg-sand-50/50">
+                                <td class="p-4 font-medium text-sand-800">Harbour-Level Input</td>
+                                <td class="text-center p-4 text-sand-400">Processor-facing</td>
+                                <td class="text-center p-4 text-sand-400">ERP onboarding</td>
+                                <td class="text-center p-4 text-sand-400">QR scanning</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Dock agent WhatsApp</td>
+                            </tr>
+                            <tr class="border-t border-sand-100">
+                                <td class="p-4 font-medium text-sand-800">Real-Time Visibility</td>
+                                <td class="text-center p-4 text-sand-400">Batch updates</td>
+                                <td class="text-center p-4 text-sand-400">End-of-day</td>
+                                <td class="text-center p-4 text-sand-400">Batch updates</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Live dashboard</td>
+                            </tr>
+                            <tr class="border-t border-sand-100 bg-sand-50/50">
+                                <td class="p-4 font-medium text-sand-800">Zero Hardware</td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-check text-sea-500"></i></td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-check text-sea-500"></i></td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-check text-sea-500"></i></td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold"><i class="fas fa-check text-sea-500 mr-1"></i>Yes</td>
+                            </tr>
+                            <tr class="border-t border-sand-100">
+                                <td class="p-4 font-medium text-sand-800">Cost to Build</td>
+                                <td class="text-center p-4 text-sand-400">Paid platform</td>
+                                <td class="text-center p-4 text-sand-400">Paid ERP</td>
+                                <td class="text-center p-4 text-sand-400">Paid platform</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Low-cost (~$0.01/msg)</td>
+                            </tr>
+                            <tr class="border-t border-sand-100 bg-sand-50/50">
+                                <td class="p-4 font-medium text-sand-800">MPEDA Compliance</td>
+                                <td class="text-center p-4 text-sand-400">Partial</td>
+                                <td class="text-center p-4 text-sand-400">Partial</td>
+                                <td class="text-center p-4 text-sand-400">Partial</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Auto-generated</td>
+                            </tr>
+                            <tr class="border-t border-sand-100">
+                                <td class="p-4 font-medium text-sand-800">Spoilage Prediction</td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-times text-coral-500"></i></td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-times text-coral-500"></i></td>
+                                <td class="text-center p-4 text-sand-400"><i class="fas fa-times text-coral-500"></i></td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Weather + Route + Temp</td>
+                            </tr>
+                            <tr class="border-t border-sand-100 bg-sand-50/50">
+                                <td class="p-4 font-medium text-sand-800">Setup Time</td>
+                                <td class="text-center p-4 text-sand-400">Weeks</td>
+                                <td class="text-center p-4 text-sand-400">Months</td>
+                                <td class="text-center p-4 text-sand-400">Weeks</td>
+                                <td class="text-center p-4 bg-ocean-50 text-sea-600 font-bold">Minutes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Why Now Section -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white rounded-2xl p-6 shadow-lg card-hover scroll-reveal">
+                    <div class="w-12 h-12 bg-ocean-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-gavel text-ocean-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">EU-IUU 2026</h3>
+                    <p class="text-sm text-sand-500">New enforcement requires full digital traceability for ALL seafood imports, not just catch certificates.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg card-hover scroll-reveal">
+                    <div class="w-12 h-12 bg-sea-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-sea-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">Smartphone Penetration</h3>
+                    <p class="text-sm text-sand-500">75% of Indian fishermen now own smartphones. WhatsApp is the default communication tool.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg card-hover scroll-reveal">
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-robot text-amber-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">AI API Revolution</h3>
+                    <p class="text-sm text-sand-500">Groq, Bhashini, and Open-Meteo offer free/cheap tiers that make AI-powered traceability viable for SMEs.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg card-hover scroll-reveal">
+                    <div class="w-12 h-12 bg-coral-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-coral-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-sand-800 mb-2">$6.2B Market</h3>
+                    <p class="text-sm text-sand-500">India is the 4th largest seafood exporter. Spoilage costs Rs.1,200Cr annually. The problem is urgent and massive.</p>
+                </div>
+            </div>
+
+            <!-- Judge Q&A -->
+            <div class="bg-white rounded-3xl p-8 shadow-lg scroll-reveal">
+                <h3 class="text-2xl font-bold text-sand-800 mb-8 text-center">Judge Q&A Preparation</h3>
+                <div class="space-y-4">
+                    <div class="border border-sand-200 rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 bg-sand-50 hover:bg-sand-100 transition flex items-center justify-between" onclick="toggleFAQ(this)">
+                            <span class="font-semibold text-sand-800">Q1: Why would a fisherman trust this?</span>
+                            <i class="fas fa-chevron-down text-sand-400 transition-transform"></i>
+                        </button>
+                        <div class="hidden p-4 bg-white">
+                            <p class="text-sand-600 text-sm">CoastalTrace is not creating a new relationship - it is digitizing an existing one. Ganesh already has an advance/credit arrangement with Coastal Exports. The ping is just making that old relationship faster. The traceability chain starts at the batch record (which IS shared and compliance-linked). The ping is simply the earliest possible signal in that chain.</p>
+                        </div>
+                    </div>
+                    <div class="border border-sand-200 rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 bg-sand-50 hover:bg-sand-100 transition flex items-center justify-between" onclick="toggleFAQ(this)">
+                            <span class="font-semibold text-sand-800">Q2: What happens when you run out of free API limits?</span>
+                            <i class="fas fa-chevron-down text-sand-400 transition-transform"></i>
+                        </button>
+                        <div class="hidden p-4 bg-white">
+                            <p class="text-sand-600 text-sm">At 200 shipments/month: WhatsApp templates cost ~$50-180, Groq costs ~$5-10, Bhashini ~$10-40, Open-Meteo commercial ~$35-50. Total: under Rs.2,000/month. This is less than 1% of the spoilage savings. The free tier gets us to pilot; the paid tier is still cheap at scale.</p>
+                        </div>
+                    </div>
+                    <div class="border border-sand-200 rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 bg-sand-50 hover:bg-sand-100 transition flex items-center justify-between" onclick="toggleFAQ(this)">
+                            <span class="font-semibold text-sand-800">Q3: Why is the fisherman ping private instead of shared?</span>
+                            <i class="fas fa-chevron-down text-sand-400 transition-transform"></i>
+                        </button>
+                        <div class="hidden p-4 bg-white">
+                            <p class="text-sand-600 text-sm">Because it is not a marketplace feature - it is a relationship feature. Ganesh already has an advance arrangement with Coastal Exports. The ping is just digitizing that existing trust. If we made it public, competitors would free-ride on Coastal's advance investment, and Ganesh would stop using it.</p>
+                        </div>
+                    </div>
+                    <div class="border border-sand-200 rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 bg-sand-50 hover:bg-sand-100 transition flex items-center justify-between" onclick="toggleFAQ(this)">
+                            <span class="font-semibold text-sand-800">Q4: How do you handle the Open-Meteo commercial use restriction?</span>
+                            <i class="fas fa-chevron-down text-sand-400 transition-transform"></i>
+                        </button>
+                        <div class="hidden p-4 bg-white">
+                            <p class="text-sand-600 text-sm">For the hackathon, we use Open-Meteo free tier for non-commercial development and pilot. For commercial deployment, we would upgrade to API Standard subscription (~30-50 EUR/month) or switch to OpenWeatherMap (free tier allows commercial use, 1,000 calls/day) or IMD free data for Indian weather.</p>
+                        </div>
+                    </div>
+                    <div class="border border-sand-200 rounded-xl overflow-hidden">
+                        <button class="w-full text-left p-4 bg-sand-50 hover:bg-sand-100 transition flex items-center justify-between" onclick="toggleFAQ(this)">
+                            <span class="font-semibold text-sand-800">Q5: What about the other nodes in the chain?</span>
+                            <i class="fas fa-chevron-down text-sand-400 transition-transform"></i>
+                        </button>
+                        <div class="hidden p-4 bg-white">
+                            <p class="text-sand-600 text-sm">We have a six-node vision: Fisherman (built), Procurement Agent (built), Truck Driver (simulated), Processing Plant (roadmap), Transit Vehicle (simulated), Port Handler (roadmap). We are honest about what is built vs simulated vs roadmap. This transparency builds trust and shows vision without overpromising.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Footer / Moral of the Story -->
+    <section class="py-20 gradient-ocean relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                <defs><pattern id="grid2" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.5"/></pattern></defs>
+                <rect width="100%" height="100%" fill="url(#grid2)" />
+            </svg>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10 scroll-reveal">
+            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-8 glass">
+                <i class="fas fa-quote-left text-white text-2xl"></i>
+            </div>
+            <h2 class="font-serif text-3xl md:text-5xl font-bold text-white leading-tight mb-8">
+                "Technology does not need to be expensive to be transformative. It needs to meet people where they are - speaking their language, using their tools, respecting their reality, and building on the trust that already exists between them."
+            </h2>
+            <div class="flex items-center justify-center space-x-4 mt-8">
+                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-fish text-ocean-700 text-xl"></i>
+                </div>
+                <div class="text-left">
+                    <p class="text-white font-bold">CoastalTrace</p>
+                    <p class="text-ocean-200 text-sm">From Boat Deck to Export Dock</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-sand-900 text-sand-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-ocean-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-fish text-white text-sm"></i>
+                        </div>
+                        <span class="text-white font-bold">CoastalTrace</span>
+                    </div>
+                    <p class="text-sm">Voice-first seafood traceability for Indian coastal exporters. Zero hardware. 22 languages. Real-time spoilage prediction.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Platform</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#workflow" class="hover:text-white transition">Six-Node Chain</a></li>
+                        <li><a href="#demo" class="hover:text-white transition">Live Dashboard</a></li>
+                        <li><a href="#architecture" class="hover:text-white transition">API Stack</a></li>
+                        <li><a href="#financials" class="hover:text-white transition">Pricing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Compliance</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition">MPEDA KDE</a></li>
+                        <li><a href="#" class="hover:text-white transition">EU-IUU Regulation</a></li>
+                        <li><a href="#" class="hover:text-white transition">Auto-Certification</a></li>
+                        <li><a href="#" class="hover:text-white transition">Audit Trail</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Connect</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white transition"><i class="fab fa-github mr-2"></i>GitHub</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fab fa-twitter mr-2"></i>Twitter</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-envelope mr-2"></i>Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-book mr-2"></i>Documentation</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-sand-800 pt-8 text-center text-sm">
+                <p> CoastalTrace - Hackathon 2026 Demo. Built with passion for Indian coastal communities.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Smooth scroll
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+        // FAQ toggle
+        function toggleFAQ(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('.fa-chevron-down');
+            content.classList.toggle('hidden');
+            icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Cost Chart
+        const costCtx = document.getElementById('costChart').getContext('2d');
+        new Chart(costCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['WhatsApp', 'Groq LLM', 'Bhashini ASR', 'Open-Meteo', 'Hosting/DB'],
+                datasets: [{
+                    data: [180, 10, 40, 50, 100],
+                    backgroundColor: ['#0ea5e9', '#10b981', '#0284c7', '#f59e0b', '#78716c'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { size: 11 } } }
+                }
+            }
+        });
+
+        // Savings Chart
+        const savingsCtx = document.getElementById('savingsChart').getContext('2d');
+        new Chart(savingsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Without CoastalTrace', 'With CoastalTrace'],
+                datasets: [{
+                    label: 'Spoilage Rate (%)',
+                    data: [20, 6.5],
+                    backgroundColor: ['#e11d48', '#10b981'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 25, ticks: { callback: function(value) { return value + '%'; } } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
