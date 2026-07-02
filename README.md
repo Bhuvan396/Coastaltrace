@@ -54,4 +54,3 @@ plain
 coastaltrace-demo/
 ├── coastaltrace_demo.html    # The demo website (single file)
 ├── README.md                 # This file
-└── LICENSE                   # MIT License
